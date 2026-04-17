@@ -13,7 +13,7 @@
     <div class="topbar">
       <div class="topbar-left">
         <h1>👨‍🍳 Kitchen Dashboard</h1>
-        <p>Today's meal predictions & admin alerts</p>
+        <p>Today's meal registrations & admin alerts</p>
       </div>
       <div class="topbar-right">
         <button class="btn btn-primary" onclick="refreshAll()">↻ Refresh</button>
@@ -25,7 +25,36 @@
     <div id="alertsSection" style="margin-bottom: 20px;">
       <h3 style="font-size: 0.9rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">📩 Admin Alerts for Today</h3>
       <div id="alertsList">
-        <div class="alert alert-info">No alerts from admin yet. Showing predictions below.</div>
+        <div class="alert alert-info">No alerts from admin yet.</div>
+      </div>
+    </div>
+
+    <!-- Today's Registered Students -->
+    <h3 style="font-size: 0.9rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">🍽️ Students Registered Today</h3>
+    <div class="stat-row" style="margin-bottom: 20px;">
+      <div class="stat-card">
+        <div class="stat-icon breakfast">☀️</div>
+        <div class="stat-info">
+          <div class="stat-label">Breakfast</div>
+          <div class="stat-value" id="countBreakfast">0</div>
+          <div class="stat-sub">students</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon lunch">🍛</div>
+        <div class="stat-info">
+          <div class="stat-label">Lunch</div>
+          <div class="stat-value" id="countLunch">0</div>
+          <div class="stat-sub">students</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon dinner">🌙</div>
+        <div class="stat-info">
+          <div class="stat-label">Dinner</div>
+          <div class="stat-value" id="countDinner">0</div>
+          <div class="stat-sub">students</div>
+        </div>
       </div>
     </div>
 
@@ -40,9 +69,23 @@
         const response = await fetch('/pre-registrations');
         const preRegistrations = await response.json();
 
+        const today = new Date().toISOString().split('T')[0];
+        const todayRegs = preRegistrations.filter(pr => pr.date === today);
+
+        // Update stat cards with real counts
+        const breakfastCount = todayRegs.filter(pr => pr.meals.includes('breakfast')).length;
+        const lunchCount = todayRegs.filter(pr => pr.meals.includes('lunch')).length;
+        const dinnerCount = todayRegs.filter(pr => pr.meals.includes('dinner')).length;
+
+        document.getElementById('countBreakfast').textContent = breakfastCount;
+        document.getElementById('countLunch').textContent = lunchCount;
+        document.getElementById('countDinner').textContent = dinnerCount;
+
+        // Build prediction cards
         const wasteLog = [];
         const meals = ['breakfast', 'lunch', 'dinner'];
         const emojis = { breakfast: '☀️', lunch: '🍛', dinner: '🌙' };
+        const counts = { breakfast: breakfastCount, lunch: lunchCount, dinner: dinnerCount };
 
         const predictionsDiv = document.getElementById('predictions');
         predictionsDiv.innerHTML = '';
@@ -79,7 +122,7 @@
         const alertsList = document.getElementById('alertsList');
 
         if (alerts.length === 0) {
-          alertsList.innerHTML = '<div class="alert alert-info">No alerts from admin yet. Showing predictions below.</div>';
+          alertsList.innerHTML = '<div class="alert alert-info">No alerts from admin yet.</div>';
           return;
         }
 
@@ -118,8 +161,8 @@
       loadAlerts();
     });
 
-    // Auto-refresh every 30 seconds
-    setInterval(refreshAll, 30000);
+    // Auto-refresh every 15 seconds
+    setInterval(refreshAll, 15000);
   </script>
 </body>
 </html>
