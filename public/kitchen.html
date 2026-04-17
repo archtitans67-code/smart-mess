@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kitchen Staff - Meal Predictions</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="predict.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="page-header">
+      <h1>👨‍🍳 Kitchen Staff Dashboard</h1>
+      <p class="subtitle">Today's meal predictions</p>
+    </div>
+
+    <div id="predictions"></div>
+
+    <button class="btn-primary" onclick="refreshPredictions()">🔄 Refresh Predictions</button>
+    <button class="btn-primary btn-secondary" onclick="goBack()">← Back</button>
+  </div>
+
+  <script>
+    async function loadPredictions() {
+      try {
+        const response = await fetch('/pre-registrations');
+        const preRegistrations = await response.json();
+
+        const wasteLog = [];
+        const meals = ['breakfast', 'lunch', 'dinner'];
+        const today = new Date().toISOString().split('T')[0];
+
+        // Filter pre-registrations for today
+        const todayPreRegs = preRegistrations.filter(pr => pr.date === today);
+
+        const predictionsDiv = document.getElementById('predictions');
+        predictionsDiv.innerHTML = '';
+
+        meals.forEach(meal => {
+          const result = predict(meal, preRegistrations, wasteLog);
+          const card = document.createElement('div');
+          card.className = 'prediction-card';
+          card.innerHTML = `
+            <h2>${meal.toUpperCase()}</h2>
+            <div class="prediction-number">${Math.round(result.prediction)} portions</div>
+            <div class="prediction-breakdown">
+              <p><strong>Breakdown:</strong></p>
+              <ul>
+                <li>Today: ${result.breakdown.todayRegistrations} pre-registrations (50%)</li>
+                <li>Avg 7 days: ${result.breakdown.avg7days} (30%)</li>
+                <li>Same weekday: ${result.breakdown.sameWeekday} (20%)</li>
+              </ul>
+            </div>
+          `;
+          predictionsDiv.appendChild(card);
+        });
+
+      } catch (error) {
+        document.getElementById('predictions').innerHTML = 
+          `<div class="alert alert-error">❌ Error loading predictions: ${error.message}</div>`;
+      }
+    }
+
+    function refreshPredictions() {
+      loadPredictions();
+    }
+
+    function goBack() {
+      window.location.href = '/';
+    }
+
+    // Load predictions on page load
+    window.addEventListener('load', loadPredictions);
+  </script>
+
+  <style>
+    .prediction-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 25px;
+      border-radius: 12px;
+      margin: 20px 0;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .prediction-card h2 {
+      color: white;
+      margin-bottom: 15px;
+      font-size: 22px;
+    }
+
+    .prediction-number {
+      font-size: 36px;
+      font-weight: bold;
+      text-align: center;
+      margin: 15px 0;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 20px;
+      border-radius: 8px;
+    }
+
+    .prediction-formula,
+    .prediction-breakdown {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      font-size: 14px;
+    }
+
+    .prediction-breakdown ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .prediction-breakdown li {
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .prediction-breakdown li:last-child {
+      border-bottom: none;
+    }
+
+    .prediction-formula p,
+    .prediction-breakdown p {
+      color: white;
+      margin: 5px 0;
+    }
+  </style>
+</body>
+</html>

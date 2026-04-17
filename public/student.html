@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Meal Registration</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="page-header">
+      <h1>👤 Student Portal</h1>
+      <p class="subtitle">Register and pre-register for meals</p>
+    </div>
+
+    <section class="section">
+      <h2>📝 One-Time Student Registration</h2>
+      <form id="studentRegistrationForm">
+        <div class="form-group">
+          <label for="studentName">Name:</label>
+          <input type="text" id="studentName" placeholder="Enter your name" required>
+        </div>
+
+        <div class="form-group">
+          <label for="rollno">Roll Number:</label>
+          <input type="text" id="rollno" placeholder="Enter roll number" required>
+        </div>
+
+        <div class="form-group">
+          <label for="section">Section:</label>
+          <input type="text" id="section" placeholder="Enter section" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">✅ Register Student</button>
+      </form>
+
+      <div id="studentMessage"></div>
+    </section>
+
+    <section class="section">
+      <h2>🍽️ Pre-Register for Today's Meals</h2>
+      <form id="preRegistrationForm">
+        <div class="form-group">
+          <label for="preRollno">Roll Number:</label>
+          <input type="text" id="preRollno" placeholder="Enter your roll number" required>
+        </div>
+
+        <div class="checkbox-group">
+          <div class="checkbox-wrapper">
+            <input type="checkbox" id="preBreakfast" name="preMeals" value="breakfast">
+            <label for="preBreakfast" class="checkbox-label">🌅 Breakfast</label>
+          </div>
+
+          <div class="checkbox-wrapper">
+            <input type="checkbox" id="preLunch" name="preMeals" value="lunch">
+            <label for="preLunch" class="checkbox-label">🍽️ Lunch</label>
+          </div>
+
+          <div class="checkbox-wrapper">
+            <input type="checkbox" id="preDinner" name="preMeals" value="dinner">
+            <label for="preDinner" class="checkbox-label">🌙 Dinner</label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-success">📅 Pre-Register</button>
+      </form>
+
+      <div id="preMessage"></div>
+    </section>
+
+    <button class="btn btn-secondary" onclick="goBack()">← Back</button>
+  </div>
+
+  <script>
+    document.getElementById('studentRegistrationForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById('studentName').value;
+      const rollno = document.getElementById('rollno').value;
+      const section = document.getElementById('section').value;
+
+      try {
+        const response = await fetch('/register-student', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ name, rollno, section })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showMessage('studentMessage', `✅ Student ${name} registered successfully!`, 'success');
+          document.getElementById('studentRegistrationForm').reset();
+        } else {
+          showMessage('studentMessage', `❌ ${data.error}`, 'error');
+        }
+      } catch (error) {
+        showMessage('studentMessage', `❌ Error: ${error.message}`, 'error');
+      }
+    });
+
+    document.getElementById('preRegistrationForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const rollno = document.getElementById('preRollno').value;
+      const checkboxes = document.querySelectorAll('input[name="preMeals"]:checked');
+      const meals = Array.from(checkboxes).map(cb => cb.value);
+
+      if (meals.length === 0) {
+        showMessage('preMessage', 'Please select at least one meal', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch('/pre-register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ rollno, meals })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showMessage('preMessage', `✅ Pre-registered for ${meals.join(', ')}!`, 'success');
+          document.getElementById('preRegistrationForm').reset();
+        } else {
+          showMessage('preMessage', `❌ ${data.error}`, 'error');
+        }
+      } catch (error) {
+        showMessage('preMessage', `❌ Error: ${error.message}`, 'error');
+      }
+    });
+
+    function showMessage(elementId, text, type) {
+      const messageDiv = document.getElementById(elementId);
+      messageDiv.className = `alert alert-${type}`;
+      messageDiv.textContent = text;
+    }
+
+    function goBack() {
+      window.location.href = '/';
+    }
+  </script>
+</body>
+</html>

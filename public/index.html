@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meal Waste Prediction System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="page-header">
+      <h1>🍽️ Meal Waste Prediction</h1>
+      <p class="subtitle">Smart meal planning for your kitchen - Reduce waste, optimize resources, and make data-driven decisions.</p>
+    </div>
+
+    <div class="button-grid">
+      <button class="btn btn-primary" onclick="goToStudent()">
+        👤 I'm a Student
+      </button>
+      <button class="btn btn-secondary" onclick="goToKitchen()">
+        👨‍🍳 Kitchen Staff
+      </button>
+      <button class="btn btn-primary" onclick="goToAdmin()">
+        📊 Admin Dashboard
+      </button>
+    </div>
+
+    <div class="features-section">
+      <h2>🌟 Key Features</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <h3>📈 Accurate Predictions</h3>
+          <p>Use machine learning to predict meal waste based on historical data and current trends.</p>
+        </div>
+        <div class="feature-card">
+          <h3>📱 Mobile Friendly</h3>
+          <p>Access the system from any device - desktop, tablet, or mobile phone.</p>
+        </div>
+        <div class="feature-card">
+          <h3>🔒 Secure Access</h3>
+          <p>Role-based access with PIN authentication for kitchen staff and admins.</p>
+        </div>
+        <div class="feature-card">
+          <h3>📊 Real-time Analytics</h3>
+          <p>Get insights into waste patterns and optimize meal planning accordingly.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <h2>ℹ️ About the System</h2>
+      <p>Our Meal Waste Prediction System helps educational institutions and cafeterias reduce food waste by providing intelligent predictions based on student preferences, attendance, and historical data. By minimizing waste, we contribute to environmental sustainability and cost savings.</p>
+    </div>
+  </div>
+
+  <script>
+    const STUDENT_PIN = '1234';
+    const KITCHEN_PIN = '1234';
+    const ADMIN_PIN = '1234';
+
+    function goToStudent() {
+      window.location.href = '/student';
+    }
+
+    function goToKitchen() {
+      const pin = prompt('Enter Kitchen PIN:');
+      if (pin === KITCHEN_PIN) {
+        window.location.href = '/kitchen';
+      } else {
+        alert('❌ Incorrect PIN');
+      }
+    }
+
+    function goToAdmin() {
+      const pin = prompt('Enter Admin PIN:');
+      if (pin === ADMIN_PIN) {
+        window.location.href = '/admin';
+      } else {
+        alert('❌ Incorrect PIN');
+      }
+    }
+  </script>
+</body>
+</html>
