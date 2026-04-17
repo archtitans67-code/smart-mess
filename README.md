@@ -1,5 +1,5 @@
 # 🍽️ Smart Mess — Meal Waste Prediction System
-
+# Note : to run this file in window powershell use command "npm.cmd start"
 A smart meal planning system for hostel and college canteens that predicts meal portions, reduces food waste, and keeps kitchen staff informed via SMS alerts.
 
 ## 📌 Problem Statement
