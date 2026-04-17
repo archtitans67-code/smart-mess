@@ -3,72 +3,86 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Meal Registration</title>
+  <title>Student Portal — Smart Mess</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <div class="page-header">
-      <h1>👤 Student Portal</h1>
-      <p class="subtitle">Register and pre-register for meals</p>
+  <div class="page-shell">
+    <!-- Top Bar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>🎓 Student Portal</h1>
+        <p>Register & pre-register for your meals</p>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-secondary" onclick="goBack()">← Home</button>
+      </div>
     </div>
 
-    <section class="section">
-      <h2>📝 One-Time Student Registration</h2>
-      <form id="studentRegistrationForm">
-        <div class="form-group">
-          <label for="studentName">Name:</label>
-          <input type="text" id="studentName" placeholder="Enter your name" required>
-        </div>
-
-        <div class="form-group">
-          <label for="rollno">Roll Number:</label>
-          <input type="text" id="rollno" placeholder="Enter roll number" required>
-        </div>
-
-        <div class="form-group">
-          <label for="section">Section:</label>
-          <input type="text" id="section" placeholder="Enter section" required>
-        </div>
-
-        <button type="submit" class="btn btn-primary">✅ Register Student</button>
-      </form>
-
-      <div id="studentMessage"></div>
-    </section>
-
-    <section class="section">
-      <h2>🍽️ Pre-Register for Today's Meals</h2>
-      <form id="preRegistrationForm">
-        <div class="form-group">
-          <label for="preRollno">Roll Number:</label>
-          <input type="text" id="preRollno" placeholder="Enter your roll number" required>
-        </div>
-
-        <div class="checkbox-group">
-          <div class="checkbox-wrapper">
-            <input type="checkbox" id="preBreakfast" name="preMeals" value="breakfast">
-            <label for="preBreakfast" class="checkbox-label">🌅 Breakfast</label>
-          </div>
-
-          <div class="checkbox-wrapper">
-            <input type="checkbox" id="preLunch" name="preMeals" value="lunch">
-            <label for="preLunch" class="checkbox-label">🍽️ Lunch</label>
-          </div>
-
-          <div class="checkbox-wrapper">
-            <input type="checkbox" id="preDinner" name="preMeals" value="dinner">
-            <label for="preDinner" class="checkbox-label">🌙 Dinner</label>
+    <div class="grid-2">
+      <!-- Registration Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon green">👤</div>
+          <div>
+            <div class="card-title">One-Time Registration</div>
+            <div class="card-subtitle">New students register here first</div>
           </div>
         </div>
+        <form id="studentRegistrationForm">
+          <div class="form-group">
+            <label for="studentName">Full Name</label>
+            <input type="text" id="studentName" placeholder="e.g., Sourav Kumar" required>
+          </div>
+          <div class="form-group">
+            <label for="rollno">Roll Number</label>
+            <input type="text" id="rollno" placeholder="e.g., 417" required>
+          </div>
+          <div class="form-group">
+            <label for="section">Section</label>
+            <input type="text" id="section" placeholder="e.g., B2" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Register Student</button>
+        </form>
+        <div id="studentMessage"></div>
+      </div>
 
-        <button type="submit" class="btn btn-success">📅 Pre-Register</button>
-      </form>
+      <!-- Pre-Registration Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon orange">🍽️</div>
+          <div>
+            <div class="card-title">Pre-Register for Today</div>
+            <div class="card-subtitle">Select meals you'll attend today</div>
+          </div>
+        </div>
+        <form id="preRegistrationForm">
+          <div class="form-group">
+            <label for="preRollno">Roll Number</label>
+            <input type="text" id="preRollno" placeholder="Enter your roll number" required>
+          </div>
 
-      <div id="preMessage"></div>
-    </section>
+          <label>Select your meals</label>
+          <div class="checkbox-group" style="margin-bottom: 16px;">
+            <div class="checkbox-pill">
+              <input type="checkbox" id="preBreakfast" name="preMeals" value="breakfast">
+              <label for="preBreakfast"><span class="pill-dot"></span> ☀️ Breakfast</label>
+            </div>
+            <div class="checkbox-pill">
+              <input type="checkbox" id="preLunch" name="preMeals" value="lunch">
+              <label for="preLunch"><span class="pill-dot"></span> 🍛 Lunch</label>
+            </div>
+            <div class="checkbox-pill">
+              <input type="checkbox" id="preDinner" name="preMeals" value="dinner">
+              <label for="preDinner"><span class="pill-dot"></span> 🌙 Dinner</label>
+            </div>
+          </div>
 
-    <button class="btn btn-secondary" onclick="goBack()">← Back</button>
+          <button type="submit" class="btn btn-success btn-full">Pre-Register</button>
+        </form>
+        <div id="preMessage"></div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -82,9 +96,7 @@
       try {
         const response = await fetch('/register-student', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, rollno, section })
         });
 
@@ -116,9 +128,7 @@
       try {
         const response = await fetch('/pre-register', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ rollno, meals })
         });
 

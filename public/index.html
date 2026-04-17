@@ -3,58 +3,64 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meal Waste Prediction System</title>
+  <title>Smart Mess — Meal Waste Prediction</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <div class="page-header">
-      <h1>🍽️ Meal Waste Prediction</h1>
-      <p class="subtitle">Smart meal planning for your kitchen - Reduce waste, optimize resources, and make data-driven decisions.</p>
+  <div class="page-shell" style="justify-content: center; align-items: center;">
+    <div class="home-hero">
+      <h1>🍽️ Smart <span class="accent">Mess</span></h1>
+      <p>Intelligent meal planning that reduces waste, saves money, and keeps every plate full.</p>
     </div>
 
-    <div class="button-grid">
-      <button class="btn btn-primary" onclick="goToStudent()">
-        👤 I'm a Student
-      </button>
-      <button class="btn btn-secondary" onclick="goToKitchen()">
-        👨‍🍳 Kitchen Staff
-      </button>
-      <button class="btn btn-primary" onclick="goToAdmin()">
-        📊 Admin Dashboard
-      </button>
-    </div>
+    <div class="home-cards">
+      <div class="role-card" onclick="goToStudent()">
+        <div class="role-icon">🎓</div>
+        <div class="role-name">Student</div>
+        <div class="role-desc">Register & pre-register for today's meals</div>
+        <div class="role-strip" style="background: linear-gradient(90deg, #3da05a, #16a34a);"></div>
+      </div>
 
-    <div class="features-section">
-      <h2>🌟 Key Features</h2>
-      <div class="features-grid">
-        <div class="feature-card">
-          <h3>📈 Accurate Predictions</h3>
-          <p>Use machine learning to predict meal waste based on historical data and current trends.</p>
-        </div>
-        <div class="feature-card">
-          <h3>📱 Mobile Friendly</h3>
-          <p>Access the system from any device - desktop, tablet, or mobile phone.</p>
-        </div>
-        <div class="feature-card">
-          <h3>🔒 Secure Access</h3>
-          <p>Role-based access with PIN authentication for kitchen staff and admins.</p>
-        </div>
-        <div class="feature-card">
-          <h3>📊 Real-time Analytics</h3>
-          <p>Get insights into waste patterns and optimize meal planning accordingly.</p>
-        </div>
+      <div class="role-card" onclick="goToKitchen()">
+        <div class="role-icon">👨‍🍳</div>
+        <div class="role-name">Kitchen Staff</div>
+        <div class="role-desc">View predictions & admin alerts</div>
+        <div class="role-strip" style="background: linear-gradient(90deg, #f97316, #ea580c);"></div>
+      </div>
+
+      <div class="role-card" onclick="goToAdmin()">
+        <div class="role-icon">📊</div>
+        <div class="role-name">Admin</div>
+        <div class="role-desc">Analytics, alerts & waste tracking</div>
+        <div class="role-strip" style="background: linear-gradient(90deg, #7c5cbf, #6d28d9);"></div>
       </div>
     </div>
 
-    <div class="about-section">
-      <h2>ℹ️ About the System</h2>
-      <p>Our Meal Waste Prediction System helps educational institutions and cafeterias reduce food waste by providing intelligent predictions based on student preferences, attendance, and historical data. By minimizing waste, we contribute to environmental sustainability and cost savings.</p>
+    <div class="feature-row">
+      <div class="feature-item">
+        <div class="feat-icon">📈</div>
+        <h3>Smart Predictions</h3>
+        <p>ML-powered forecasting from historical data</p>
+      </div>
+      <div class="feature-item">
+        <div class="feat-icon">📱</div>
+        <h3>SMS Alerts</h3>
+        <p>Instant kitchen notifications on portion counts</p>
+      </div>
+      <div class="feature-item">
+        <div class="feat-icon">🥗</div>
+        <h3>Waste Reduction</h3>
+        <p>Track and minimize food waste every day</p>
+      </div>
+      <div class="feature-item">
+        <div class="feat-icon">🔒</div>
+        <h3>PIN Protected</h3>
+        <p>Role-based access for staff and admins</p>
+      </div>
     </div>
   </div>
 
   <script>
-    const STUDENT_PIN = '1234';
     const KITCHEN_PIN = '1234';
     const ADMIN_PIN = '1234';
 
@@ -66,8 +72,8 @@
       const pin = prompt('Enter Kitchen PIN:');
       if (pin === KITCHEN_PIN) {
         window.location.href = '/kitchen';
-      } else {
-        alert('❌ Incorrect PIN');
+      } else if (pin !== null) {
+        alert('Incorrect PIN');
       }
     }
 
@@ -75,8 +81,8 @@
       const pin = prompt('Enter Admin PIN:');
       if (pin === ADMIN_PIN) {
         window.location.href = '/admin';
-      } else {
-        alert('❌ Incorrect PIN');
+      } else if (pin !== null) {
+        alert('Incorrect PIN');
       }
     }
   </script>

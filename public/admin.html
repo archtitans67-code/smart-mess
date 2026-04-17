@@ -3,85 +3,145 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard</title>
+  <title>Admin Dashboard — Smart Mess</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="predict.js"></script>
 </head>
 <body>
-  <div class="container dashboard-container">
-    <div class="page-header">
-      <h1>📊 Admin Dashboard</h1>
-      <p class="subtitle">Meal predictions & waste tracking</p>
+  <div class="page-shell">
+    <!-- Top Bar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>📊 Admin Dashboard</h1>
+        <p>Predictions, alerts & waste tracking</p>
+      </div>
+      <div class="topbar-right">
+        <span id="accuracyBadge" class="badge badge-green">—</span>
+        <button class="btn btn-secondary" onclick="resetAllData()" style="background:#fef0f0; color:#d64545; border-color:#fecaca;">Reset All Data</button>
+        <button class="btn btn-secondary" onclick="goBack()">← Home</button>
+      </div>
     </div>
 
-    <section class="section">
-      <h2>📈 Analytics</h2>
-      <div class="charts-grid">
-        <div class="card">
+    <!-- Today's Registration Stats -->
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-icon breakfast">☀️</div>
+        <div class="stat-info">
+          <div class="stat-label">Breakfast</div>
+          <div class="stat-value" id="statBreakfast">0</div>
+          <div class="stat-sub">students registered today</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon lunch">🍛</div>
+        <div class="stat-info">
+          <div class="stat-label">Lunch</div>
+          <div class="stat-value" id="statLunch">0</div>
+          <div class="stat-sub">students registered today</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon dinner">🌙</div>
+        <div class="stat-info">
+          <div class="stat-label">Dinner</div>
+          <div class="stat-value" id="statDinner">0</div>
+          <div class="stat-sub">students registered today</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid-2" style="margin-bottom: 20px;">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon orange">📈</div>
+          <div>
+            <div class="card-title">Predicted Portions</div>
+            <div class="card-subtitle">Today's meal forecast</div>
+          </div>
+        </div>
+        <div class="chart-wrap">
           <canvas id="predictionChart"></canvas>
         </div>
-        <div class="card">
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon red">📉</div>
+          <div>
+            <div class="card-title">Waste Trend</div>
+            <div class="card-subtitle">Last 7 days delta</div>
+          </div>
+        </div>
+        <div class="chart-wrap">
           <canvas id="wasteChart"></canvas>
         </div>
       </div>
-    </section>
+    </div>
 
-    <div id="accuracy" class="alert alert-info"></div>
-
-    <section class="section">
-      <h2>📱 Send SMS Alert to Kitchen</h2>
-      <form id="smsForm">
-        <div class="form-group">
-          <label for="smsMeal">Select Meal:</label>
-          <select id="smsMeal" required onchange="fillPrediction()">
-            <option value="">-- Choose Meal --</option>
-            <option value="breakfast">🌅 Breakfast</option>
-            <option value="lunch">🍽️ Lunch</option>
-            <option value="dinner">🌙 Dinner</option>
-          </select>
+    <!-- Forms Row -->
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon green">📤</div>
+          <div>
+            <div class="card-title">Send Alert to Kitchen</div>
+            <div class="card-subtitle">Notify kitchen staff about portions</div>
+          </div>
         </div>
+        <form id="smsForm">
+          <div class="form-group">
+            <label for="smsMeal">Meal</label>
+            <select id="smsMeal" required onchange="fillPrediction()">
+              <option value="">Select meal…</option>
+              <option value="breakfast">Breakfast</option>
+              <option value="lunch">Lunch</option>
+              <option value="dinner">Dinner</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="smsPrediction">Predicted Portions</label>
+            <input type="number" id="smsPrediction" placeholder="Auto-filled from prediction" required>
+          </div>
+          <button type="submit" class="btn btn-success btn-full">Send Alert to Kitchen</button>
+        </form>
+        <div id="smsMessage"></div>
+      </div>
 
-        <div class="form-group">
-          <label for="smsPrediction">Predicted Portions:</label>
-          <input type="number" id="smsPrediction" placeholder="e.g., 45" required>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon blue">📝</div>
+          <div>
+            <div class="card-title">Log Actual Cooked</div>
+            <div class="card-subtitle">Record actual vs predicted</div>
+          </div>
         </div>
-
-        <button type="submit" class="btn btn-success">📤 Send SMS Alert</button>
-      </form>
-
-      <div id="smsMessage"></div>
-    </section>
-
-    <section class="section">
-      <h2>📝 Log Actual Cooked Quantity</h2>
-      <form id="wasteForm">
-        <div class="form-group">
-          <label for="wasteMeal">Select Meal:</label>
-          <select id="wasteMeal" required>
-            <option value="">-- Choose Meal --</option>
-            <option value="breakfast">🌅 Breakfast</option>
-            <option value="lunch">🍽️ Lunch</option>
-            <option value="dinner">🌙 Dinner</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="predicted">Predicted Portions:</label>
-          <input type="number" id="predicted" placeholder="e.g., 42" required>
-        </div>
-
-        <div class="form-group">
-          <label for="actual">Actual Cooked Portions:</label>
-          <input type="number" id="actual" placeholder="e.g., 45" required>
-        </div>
-
-        <button type="submit" class="btn btn-primary">✅ Log Waste</button>
-      </form>
-
-      <div id="wasteMessage"></div>
-      <button class="btn btn-secondary" onclick="goBack()">← Back</button>
-    </section>
+        <form id="wasteForm">
+          <div class="form-group">
+            <label for="wasteMeal">Meal</label>
+            <select id="wasteMeal" required>
+              <option value="">Select meal…</option>
+              <option value="breakfast">Breakfast</option>
+              <option value="lunch">Lunch</option>
+              <option value="dinner">Dinner</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="predicted">Predicted</label>
+              <input type="number" id="predicted" placeholder="e.g., 42" required>
+            </div>
+            <div class="form-group">
+              <label for="actual">Actual Cooked</label>
+              <input type="number" id="actual" placeholder="e.g., 45" required>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">Log Waste Data</button>
+        </form>
+        <div id="wasteMessage"></div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -89,11 +149,10 @@
     let allWasteLogs = [];
     let predictionChart = null;
     let wasteChart = null;
-    let currentPredictions = {}; // Store current predictions for SMS
+    let currentPredictions = {};
 
     async function loadDashboard() {
       try {
-        // Fetch pre-registrations and waste logs
         const [preRegResponse, wasteResponse] = await Promise.all([
           fetch('/pre-registrations'),
           fetch('/waste-log')
@@ -102,14 +161,26 @@
         allPreRegistrations = await preRegResponse.json();
         allWasteLogs = await wasteResponse.json();
 
-        // Draw charts and predictions
+        updateStatCards();
         drawPredictionChart();
         drawWasteChart();
         calculateAccuracy();
-
       } catch (error) {
         console.error('Error loading dashboard:', error);
       }
+    }
+
+    function updateStatCards() {
+      const today = new Date().toISOString().split('T')[0];
+      const todayRegs = allPreRegistrations.filter(pr => pr.date === today);
+
+      const breakfastCount = todayRegs.filter(pr => pr.meals.includes('breakfast')).length;
+      const lunchCount = todayRegs.filter(pr => pr.meals.includes('lunch')).length;
+      const dinnerCount = todayRegs.filter(pr => pr.meals.includes('dinner')).length;
+
+      document.getElementById('statBreakfast').textContent = breakfastCount;
+      document.getElementById('statLunch').textContent = lunchCount;
+      document.getElementById('statDinner').textContent = dinnerCount;
     }
 
     function drawPredictionChart() {
@@ -118,12 +189,11 @@
 
       const predictions = meals.map(meal => {
         const result = predict(meal, allPreRegistrations, allWasteLogs);
-        currentPredictions[meal] = Math.round(result.prediction); // Store for SMS
+        currentPredictions[meal] = Math.round(result.prediction);
         return Math.round(result.prediction);
       });
 
       const ctx = document.getElementById('predictionChart').getContext('2d');
-
       if (predictionChart) predictionChart.destroy();
 
       predictionChart = new Chart(ctx, {
@@ -133,38 +203,32 @@
           datasets: [{
             label: 'Predicted Portions',
             data: predictions,
-            backgroundColor: [
-              'rgba(102, 126, 234, 0.8)',
-              'rgba(244, 93, 173, 0.8)',
-              'rgba(74, 198, 253, 0.8)'
-            ],
-            borderColor: [
-              'rgba(102, 126, 234, 1)',
-              'rgba(244, 93, 173, 1)',
-              'rgba(74, 198, 253, 1)'
-            ],
-            borderWidth: 2
+            backgroundColor: ['#fbbf24', '#f97316', '#8b5cf6'],
+            borderRadius: 8,
+            borderSkipped: false
           }]
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           plugins: {
+            legend: { display: false },
             title: {
               display: true,
-              text: `Today's Predictions (${today})`
+              text: `Predictions for ${today}`,
+              font: { size: 13, weight: '600', family: 'Inter' },
+              color: '#2d2418'
             }
           },
           scales: {
-            y: {
-              beginAtZero: true
-            }
+            y: { beginAtZero: true, grid: { color: '#f0ead8' } },
+            x: { grid: { display: false } }
           }
         }
       });
     }
 
     function drawWasteChart() {
-      // Get last 7 days of waste data
       const last7Days = [];
       for (let i = 6; i >= 0; i--) {
         const date = new Date();
@@ -175,13 +239,11 @@
       const wasteDelta = last7Days.map(date => {
         const dayWaste = allWasteLogs.filter(w => w.date === date);
         if (dayWaste.length === 0) return 0;
-
         const avgDelta = dayWaste.reduce((sum, w) => sum + ((w.actual - w.predicted) / w.predicted * 100), 0) / dayWaste.length;
         return Math.round(avgDelta);
       });
 
       const ctx = document.getElementById('wasteChart').getContext('2d');
-
       if (wasteChart) wasteChart.destroy();
 
       wasteChart = new Chart(ctx, {
@@ -191,60 +253,59 @@
           datasets: [{
             label: 'Waste Delta (%)',
             data: wasteDelta,
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            borderColor: 'rgba(255, 99, 132, 1)',
+            borderColor: '#d64545',
+            backgroundColor: 'rgba(214, 69, 69, 0.08)',
             borderWidth: 2,
-            fill: false
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#d64545',
+            pointRadius: 4
           }]
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           plugins: {
+            legend: { display: false },
             title: {
               display: true,
-              text: 'Waste Trends (Last 7 Days)'
+              text: 'Waste Trend (7 Days)',
+              font: { size: 13, weight: '600', family: 'Inter' },
+              color: '#2d2418'
             }
           },
           scales: {
-            y: {
-              beginAtZero: true
-            }
+            y: { beginAtZero: true, grid: { color: '#f0ead8' } },
+            x: { grid: { display: false } }
           }
         }
       });
     }
 
     function calculateAccuracy() {
+      const badge = document.getElementById('accuracyBadge');
       if (allWasteLogs.length === 0) {
-        document.getElementById('accuracy').innerHTML = '<div class="alert alert-info">No waste data available yet</div>';
+        badge.textContent = 'No waste data yet';
         return;
       }
-
       const totalWaste = allWasteLogs.reduce((sum, w) => sum + Math.abs(w.actual - w.predicted), 0);
       const avgWaste = totalWaste / allWasteLogs.length;
       const accuracy = Math.max(0, 100 - (avgWaste / allWasteLogs.reduce((sum, w) => sum + w.predicted, 0) / allWasteLogs.length * 100));
-
-      document.getElementById('accuracy').innerHTML = `<div class="alert alert-info">Prediction Accuracy: ${Math.round(accuracy)}%</div>`;
+      badge.textContent = `Accuracy: ${Math.round(accuracy)}%`;
     }
 
-    // SMS Form Handler
+    // SMS Form
     document.getElementById('smsForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-
       const meal = document.getElementById('smsMeal').value;
       const prediction = document.getElementById('smsPrediction').value;
-
       try {
         const response = await fetch('/send-sms', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ meal, prediction: parseInt(prediction) })
         });
-
         const data = await response.json();
-
         if (response.ok) {
           showMessage('smsMessage', `✅ ${data.message}`, 'success');
           document.getElementById('smsForm').reset();
@@ -259,8 +320,6 @@
     function fillPrediction() {
       const meal = document.getElementById('smsMeal').value;
       if (!meal) return;
-
-      // Find the prediction for this meal from currentPredictions
       const result = predict(meal, allPreRegistrations, allWasteLogs);
       document.getElementById('smsPrediction').value = Math.round(result.prediction);
     }
@@ -271,33 +330,22 @@
       messageDiv.textContent = text;
     }
 
-    // Waste Form Handler
+    // Waste Form
     document.getElementById('wasteForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-
       const meal = document.getElementById('wasteMeal').value;
       const predicted = document.getElementById('predicted').value;
       const actual = document.getElementById('actual').value;
-
       try {
         const response = await fetch('/log-waste', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ 
-            meal, 
-            predicted: parseInt(predicted), 
-            actual: parseInt(actual) 
-          })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ meal, predicted: parseInt(predicted), actual: parseInt(actual) })
         });
-
         const data = await response.json();
-
         if (response.ok) {
-          showMessage('wasteMessage', `✅ ${data.message} (Predicted: ${data.predicted}, Actual: ${data.actual}, Delta: ${data.delta})`, 'success');
+          showMessage('wasteMessage', `✅ ${data.message} (Delta: ${data.delta})`, 'success');
           document.getElementById('wasteForm').reset();
-          // Reload dashboard to update charts
           loadDashboard();
         } else {
           showMessage('wasteMessage', `❌ ${data.error}`, 'error');
@@ -307,8 +355,23 @@
       }
     });
 
-    // Load dashboard on page load
     window.addEventListener('load', loadDashboard);
+
+    async function resetAllData() {
+      if (!confirm('Are you sure you want to delete ALL data? This will remove all students, registrations, waste logs, and alerts. This cannot be undone.')) return;
+      try {
+        const response = await fetch('/reset-data', { method: 'POST' });
+        const data = await response.json();
+        if (response.ok) {
+          alert('All data has been reset!');
+          loadDashboard();
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    }
 
     function goBack() {
       window.location.href = '/';

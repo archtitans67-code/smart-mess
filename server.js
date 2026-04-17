@@ -30,7 +30,8 @@ function initializeDataFile() {
       students: [],
       preRegistrations: [],
       registrations: [],
-      wastelog: []
+      wastelog: [],
+      sentAlerts: []
     };
     fs.writeFileSync(DATA_FILE, JSON.stringify(initialData, null, 2));
   }
@@ -43,7 +44,7 @@ function readData() {
     return JSON.parse(data);
   } catch (err) {
     console.error('Error reading data.json:', err);
-    return { students: [], preRegistrations: [], registrations: [], wastelog: [] };
+    return { students: [], preRegistrations: [], registrations: [], wastelog: [], sentAlerts: [] };
   }
 }
 
@@ -235,13 +236,27 @@ app.post('/send-sms', (req, res) => {
       return res.status(400).json({ error: 'Meal and prediction required' });
     }
 
-    const message = `🍳 Meal Alert:\n${meal.toUpperCase()}\nPredicted portions: ${Math.round(prediction)}\n\nPlease prepare accordingly!`;
+    // Save alert to data.json so kitchen can read it
+    const data = readData();
+    if (!data.sentAlerts) data.sentAlerts = [];
+    // Remove previous alert for same meal+date
+    const today = getTodayDate();
+    data.sentAlerts = data.sentAlerts.filter(a => !(a.meal === meal && a.date === today));
+    data.sentAlerts.push({
+      meal: meal,
+      prediction: Math.round(prediction),
+      date: today,
+      sentAt: new Date().toISOString()
+    });
+    writeData(data);
+
+    const message = `Meal Alert: ${meal.toUpperCase()} - Predicted portions: ${Math.round(prediction)}. Please prepare accordingly!`;
 
     if (!client) {
       console.log('SMS Stub:', message);
       return res.json({
         success: true,
-        message: `SMS logged to console (Twilio not configured): ${message}`
+        message: `Alert sent for ${meal}: ${Math.round(prediction)} portions`
       });
     }
 
@@ -268,6 +283,20 @@ app.post('/send-sms', (req, res) => {
     res.status(500).json({ error: 'SMS sending failed' });
   }
 });
+
+// Route 4.1: GET /sent-alerts - Fetch today's sent alerts for kitchen display
+app.get('/sent-alerts', (req, res) => {
+  try {
+    const data = readData();
+    const today = getTodayDate();
+    const alerts = (data.sentAlerts || []).filter(a => a.date === today);
+    res.json(alerts);
+  } catch (err) {
+    console.error('Error in /sent-alerts:', err);
+    res.status(500).json({ error: 'Failed to fetch alerts' });
+  }
+});
+
 
 // Route 5: POST /log-waste - Admin logs actual cooked quantity
 app.post('/log-waste', (req, res) => {
@@ -311,6 +340,24 @@ app.get('/waste-log', (req, res) => {
   } catch (err) {
     console.error('Error in /waste-log:', err);
     res.status(500).json({ error: 'Failed to fetch waste log' });
+  }
+});
+
+// Route 7: POST /reset-data - Reset all data
+app.post('/reset-data', (req, res) => {
+  try {
+    const freshData = {
+      students: [],
+      preRegistrations: [],
+      registrations: [],
+      wastelog: [],
+      sentAlerts: []
+    };
+    writeData(freshData);
+    res.json({ success: true, message: 'All data has been reset' });
+  } catch (err) {
+    console.error('Error in /reset-data:', err);
+    res.status(500).json({ error: 'Failed to reset data' });
   }
 });
 

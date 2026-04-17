@@ -3,21 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kitchen Staff - Meal Predictions</title>
+  <title>Kitchen Dashboard — Smart Mess</title>
   <link rel="stylesheet" href="style.css">
   <script src="predict.js"></script>
 </head>
 <body>
-  <div class="container">
-    <div class="page-header">
-      <h1>👨‍🍳 Kitchen Staff Dashboard</h1>
-      <p class="subtitle">Today's meal predictions</p>
+  <div class="page-shell">
+    <!-- Top Bar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>👨‍🍳 Kitchen Dashboard</h1>
+        <p>Today's meal predictions & admin alerts</p>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-primary" onclick="refreshAll()">↻ Refresh</button>
+        <button class="btn btn-secondary" onclick="goBack()">← Home</button>
+      </div>
     </div>
 
-    <div id="predictions"></div>
+    <!-- Admin Alerts Section -->
+    <div id="alertsSection" style="margin-bottom: 20px;">
+      <h3 style="font-size: 0.9rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">📩 Admin Alerts for Today</h3>
+      <div id="alertsList">
+        <div class="alert alert-info">No alerts from admin yet. Showing predictions below.</div>
+      </div>
+    </div>
 
-    <button class="btn-primary" onclick="refreshPredictions()">🔄 Refresh Predictions</button>
-    <button class="btn-primary btn-secondary" onclick="goBack()">← Back</button>
+    <!-- Prediction Cards -->
+    <h3 style="font-size: 0.9rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">📊 Predicted Portions</h3>
+    <div id="predictions" class="grid-3"></div>
   </div>
 
   <script>
@@ -28,105 +42,84 @@
 
         const wasteLog = [];
         const meals = ['breakfast', 'lunch', 'dinner'];
-        const today = new Date().toISOString().split('T')[0];
-
-        // Filter pre-registrations for today
-        const todayPreRegs = preRegistrations.filter(pr => pr.date === today);
+        const emojis = { breakfast: '☀️', lunch: '🍛', dinner: '🌙' };
 
         const predictionsDiv = document.getElementById('predictions');
         predictionsDiv.innerHTML = '';
 
         meals.forEach(meal => {
           const result = predict(meal, preRegistrations, wasteLog);
+          const mealName = meal.charAt(0).toUpperCase() + meal.slice(1);
           const card = document.createElement('div');
-          card.className = 'prediction-card';
+          card.className = 'kitchen-meal-card';
           card.innerHTML = `
-            <h2>${meal.toUpperCase()}</h2>
-            <div class="prediction-number">${Math.round(result.prediction)} portions</div>
-            <div class="prediction-breakdown">
-              <p><strong>Breakdown:</strong></p>
-              <ul>
-                <li>Today: ${result.breakdown.todayRegistrations} pre-registrations (50%)</li>
-                <li>Avg 7 days: ${result.breakdown.avg7days} (30%)</li>
-                <li>Same weekday: ${result.breakdown.sameWeekday} (20%)</li>
-              </ul>
-            </div>
+            <div class="meal-strip ${meal}"></div>
+            <div class="meal-emoji">${emojis[meal]}</div>
+            <div class="meal-name">${mealName}</div>
+            <div class="meal-count">${Math.round(result.prediction)}</div>
+            <div class="meal-unit">predicted portions</div>
+            <ul class="breakdown-list" style="text-align: left; margin-top: 16px;">
+              <li><span>Today's pre-reg (50%)</span><span>${result.breakdown.todayRegistrations}</span></li>
+              <li><span>Avg 7 days (30%)</span><span>${result.breakdown.avg7days}</span></li>
+              <li><span>Same weekday (20%)</span><span>${result.breakdown.sameWeekday}</span></li>
+            </ul>
           `;
           predictionsDiv.appendChild(card);
         });
-
       } catch (error) {
-        document.getElementById('predictions').innerHTML = 
-          `<div class="alert alert-error">❌ Error loading predictions: ${error.message}</div>`;
+        document.getElementById('predictions').innerHTML =
+          `<div class="alert alert-error">Error loading predictions: ${error.message}</div>`;
       }
     }
 
-    function refreshPredictions() {
+    async function loadAlerts() {
+      try {
+        const response = await fetch('/sent-alerts');
+        const alerts = await response.json();
+        const alertsList = document.getElementById('alertsList');
+
+        if (alerts.length === 0) {
+          alertsList.innerHTML = '<div class="alert alert-info">No alerts from admin yet. Showing predictions below.</div>';
+          return;
+        }
+
+        const emojis = { breakfast: '☀️', lunch: '🍛', dinner: '🌙' };
+        alertsList.innerHTML = '';
+
+        alerts.forEach(alert => {
+          const mealName = alert.meal.charAt(0).toUpperCase() + alert.meal.slice(1);
+          const time = new Date(alert.sentAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+          const div = document.createElement('div');
+          div.className = 'alert-card';
+          div.style.marginBottom = '10px';
+          div.innerHTML = `
+            <div class="alert-dot"></div>
+            <div class="alert-text">${emojis[alert.meal] || '🍽️'} <strong>${mealName}</strong> — Prepare <strong>${alert.prediction} portions</strong></div>
+            <div class="alert-time">${time}</div>
+          `;
+          alertsList.appendChild(div);
+        });
+      } catch (error) {
+        console.error('Error loading alerts:', error);
+      }
+    }
+
+    function refreshAll() {
       loadPredictions();
+      loadAlerts();
     }
 
     function goBack() {
       window.location.href = '/';
     }
 
-    // Load predictions on page load
-    window.addEventListener('load', loadPredictions);
+    window.addEventListener('load', () => {
+      loadPredictions();
+      loadAlerts();
+    });
+
+    // Auto-refresh every 30 seconds
+    setInterval(refreshAll, 30000);
   </script>
-
-  <style>
-    .prediction-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 25px;
-      border-radius: 12px;
-      margin: 20px 0;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    }
-
-    .prediction-card h2 {
-      color: white;
-      margin-bottom: 15px;
-      font-size: 22px;
-    }
-
-    .prediction-number {
-      font-size: 36px;
-      font-weight: bold;
-      text-align: center;
-      margin: 15px 0;
-      background: rgba(255, 255, 255, 0.2);
-      padding: 20px;
-      border-radius: 8px;
-    }
-
-    .prediction-formula,
-    .prediction-breakdown {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 15px;
-      border-radius: 8px;
-      margin: 15px 0;
-      font-size: 14px;
-    }
-
-    .prediction-breakdown ul {
-      list-style: none;
-      padding-left: 0;
-    }
-
-    .prediction-breakdown li {
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .prediction-breakdown li:last-child {
-      border-bottom: none;
-    }
-
-    .prediction-formula p,
-    .prediction-breakdown p {
-      color: white;
-      margin: 5px 0;
-    }
-  </style>
 </body>
 </html>
