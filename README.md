@@ -82,7 +82,6 @@ npm install
 
 # Start the server
 node server.js
-// node.cmd start - To Start In A Windows Machine
 ```
 
 ### Environment Variables (`.env`)
@@ -105,6 +104,7 @@ npm start
 
 # Development (auto-restart on file changes)
 npm run dev
+// node.cmd start - To Start In A Windows Machine
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
